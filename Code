@@ -1,0 +1,85 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox, simpledialog
+from PIL import Image, ImageTk
+import json
+import os
+import random
+
+class Pet:
+    def __init__(self, name, image_path, personality):
+        self.name = name
+        self.image_path = image_path
+        self.personality = personality  # Dictionary of traits
+        self.memories = {}  # Stores conversation history
+        self.thoughts = []
+
+    def get_response(self, message):
+        # Generate response based on personality and memory
+        if self.personality["humor"] > 70:
+            return "That's hilarious! Did you mean to be funny or are you just naturally witty?"
+        elif self.personality["emotionality"] > 70:
+            return f"{self.name} feels: {random.choice(['excited!', 'sad.', 'confused.', 'happy!'])}"
+        else:
+            return "Hmm, interesting. Tell me more about that."
+
+    def add_memory(self, message, response):
+        self.memories[len(self.memories)+1] = {"message": message, "response": response}
+
+class DesktopPetApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Desktop Pet Companion")
+        self.root.geometry("1000x800")
+
+        self.pets = []
+        self.current_pet = None
+
+        # Main UI
+        self.create_main_window()
+        self.create_settings_tabs()
+
+        # Initialize with default pet
+        self.add_pet("Buddy", "default.png", {
+            "curiosity": 75,
+            "shyness": 25,
+            "humor": 50,
+            "emotionality": 60
+        })
+
+    def create_main_window(self):
+        # Pet display
+        self.pet_label = tk.Label(self.root)
+        self.pet_label.pack(pady=10)
+
+        # Movement controls
+        self.move_buttons = tk.Frame(self.root)
+        tk.Button(self.move_buttons, text="Move Left", command=self.move_left).pack(side=tk.LEFT, padx=5)
+        tk.Button(self.move_buttons, text="Move Right", command=self.move_right).pack(side=tk.LEFT, padx=5)
+        tk.Button(self.move_buttons, text="Move Up", command=self.move_up).pack(side=tk.LEFT, padx=5)
+        tk.Button(self.move_buttons, text="Move Down", command=self.move_down).pack(side=tk.LEFT, padx=5)
+        self.move_buttons.pack()
+
+        # Chat interface
+        self.chat_frame = tk.Frame(self.root)
+        self.chat_text = tk.Text(self.chat_frame, height=10, width=60)
+        self.chat_text.pack(side=tk.LEFT, fill=tk.BOTH)
+
+        self.input_frame = tk.Frame(self.chat_frame)
+        self.input_entry = tk.Entry(self.input_frame)
+        self.input_entry.pack(side=tk.LEFT, fill=tk.X)
+        tk.Button(self.input_frame, text="Send", command=self.send_message).pack(side=tk.LEFT)
+        self.input_frame.pack()
+
+        self.chat_frame.pack(pady=10)
+
+    def create_settings_tabs(self):
+        # Settings tabs
+        self.settings_tabs = tk.Notebook(self.root)
+
+        # Pet management tab
+        self.pet_tab = tk.Frame(self.settings_tabs)
+        self.settings_tabs.add(self.pet_tab, text="Pets")
+
+        # Personality tab
+        self.personality_tab = tk.Frame(self.settings_tabs)
+        self.settings_tabs.add(self.personality_tab, text="Personality")
